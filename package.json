@@ -1,0 +1,16 @@
+{
+  "name": "test-chat",
+  "version": "1.0.0",
+  "description": "testing session and socket.io",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Erik",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "io-session-handler": "^1.0.74",
+    "socket.io": "^4.0.2"
+  }
+}
