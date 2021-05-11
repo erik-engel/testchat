@@ -11,6 +11,7 @@ const users = {}
 // Sockets
 
 io.on('connection', (socket) => {
+  //socket.join('some room')
   console.log('a user connected');
   //socket.send(socket.id)
   console.log(socket.id);
@@ -21,14 +22,16 @@ io.on('connection', (socket) => {
 
 io.on('connection', (socket) => {
   socket.on('new-user', name => {
-      users[socket.id] = name
-      io.emit('user-connected', name)
+    socket.join('room-' + name)
+    users[socket.id] = name
+    io.sockets.in('room-' + name).emit('user-connected', name)
+    //socket.broadcast.emit('user-connected', name)
 
   });
 
-  socket.on('chat message', (msg) => {
+  socket.on('chat message', msg => {
     console.log('message: ', msg);
-    io.emit('chat message', msg);
+    socket.broadcast.emit('chat message', { msg: msg, name: users[socket.id] });
   });
 });
 
@@ -41,6 +44,6 @@ server.listen(PORT, (error) => {
   console.log('Server is running on port', Number(PORT));
 });
 
-module.exports = {
-  server,
-};
+// module.exports = {
+//   server,
+// };
