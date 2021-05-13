@@ -28,12 +28,12 @@
       <!-- chat form  -->
 
       <div>
-        <button id="myButton" class="btn border border-dark rounded bg-white mr-3" onclick="openForm()">
+        <button id="myButton" class="btn border border-dark rounded bg-white mr-3" onclick="openForm(document.getElementById('chat-header').innerText)">
           Chat
         </button>
 
         <div class="border border-dark p-3 m-3 rounded" id="myForm">
-          <h1>Chat</h1>
+          <h1 id="chat-header">Chat</h1>
 
           <ul id="messages" class="h-25 border border-dark rounded"
             style="min-height: 200px; max-height: 300px; overflow: scroll"></ul>
@@ -60,12 +60,18 @@
     document.addEventListener('DOMContentLoaded', function () {
       document.getElementById('myForm').style.display = 'none';
     });
-    function openForm() {
+    function openForm(name) {
+      let chathead = document.getElementById('chat-header')
       document.getElementById('myForm').style.display = 'block';
       document.getElementById('myButton').style.display = 'none';
+      if(name === 'Chat' ){
       const name = prompt('What is your name?')
       socket.emit('new-user', name)
-      appendMessage(`You have connected!`)
+      appendMessage(`Hi ${name}, you have connected!`)
+      chathead.innerText = name
+      } else {
+        appendMessage(`Still connected!`)
+      }
     }
 
     function closeForm() {

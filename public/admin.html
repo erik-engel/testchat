@@ -1,123 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Bootstrap CSS -->
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
-      integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
-      crossorigin="anonymous"
-    />
-    <title>Nerdshop</title>
-  </head>
 
-  <body>
-    <div class="d-flex flex-row justify-content-between h-100">
-      <!-- left side  -->
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+    integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous" />
+  <title>Nerdshop</title>
+</head>
+
+<body>
+  <div class="d-flex flex-row justify-content-between h-100">
+    <!-- left side  -->
+    <div>
+      <!-- header and info  -->
       <div>
-        <!-- header and info  -->
-        <div>
-          <h2>Contact</h2>
-          <p>
-            Get in touch by filling out the form below or use our live-chat if
-            online
-          </p>
-        </div>
-
-        <!-- list of active rooms -->
-        <div>
-          <ul
-            id="activerooms"
-            class="h-25 border border-dark rounded"
-            style="min-height: 200px; max-height: 300px; overflow: scroll"
-          ></ul>
-        </div>
+        <h2>Contact</h2>
+        <p>
+          Get in touch by filling out the form below or use our live-chat if
+          online
+        </p>
       </div>
-      <!-- right side -->
-      <!-- chat form  -->
-      <div class="d-flex flex-column-reverse h-100">
-        <div>
-          <div class="border border-dark p-3 m-3 rounded" id="myForm">
-            <h1>Chat</h1>
 
-            <ul
-              id="messages"
-              class="h-25 border border-dark rounded"
-              style="min-height: 200px; max-height: 300px; overflow: scroll"
-            ></ul>
-            <form action="" id="form" class="form-container d-flex flex-column">
-              <label for="#"
-                ><b
-                  >Write a message here, and someone will be right with you</b
-                ></label
-              >
+      <!-- list of active rooms -->
+      <div>
+        <ul id="activerooms" class="h-25 border border-dark rounded"
+          style="min-height: 200px; max-height: 300px; overflow: scroll"></ul>
+      </div>
+    </div>
+    <!-- right side -->
+    <!-- chat form  -->
+    <div class="d-flex flex-column-reverse h-100">
+      <div>
+        <div class="border border-dark p-3 m-3 rounded" id="myForm">
+          <h1>Chat</h1>
 
-              <input
-                autocomplete="off"
-                type="text"
-                id="input"
-                placeholder="Type message.."
-              />
-              <div class="mt-3">
-                <button
-                  type="submit"
-                  class="btn border border-dark rounded bg-white"
-                >
-                  Send
-                </button>
+          <ul id="messages" class="h-25 border border-dark rounded"
+            style="min-height: 200px; max-height: 300px; overflow: scroll"></ul>
+          <form action="" id="form" class="form-container d-flex flex-column">
+            <label for="#"><b>Write a message here, and someone will be right with you</b></label>
 
-                <!-- <button type="button" class="btn border border-dark rounded bg-white" onclick="closeForm()">
+            <input autocomplete="off" type="text" id="input" placeholder="Type message.." />
+            <div class="mt-3">
+              <button type="submit" class="btn border border-dark rounded bg-white">
+                Send
+              </button>
+
+              <!-- <button type="button" class="btn border border-dark rounded bg-white" onclick="closeForm()">
                 Close
               </button> -->
-              </div>
-            </form>
-          </div>
+            </div>
+          </form>
         </div>
       </div>
     </div>
-    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
-
-    <script>
-      const socket = io('http://localhost:3000');
-      let activerooms = document.getElementById('activerooms');
-      let messages = document.getElementById('messages');
-      let form = document.getElementById('form');
-      let input = document.getElementById('input');
+  </div>
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io('http://localhost:3000');
+    let activerooms = document.getElementById('activerooms');
+    let messages = document.getElementById('messages');
+    let form = document.getElementById('form');
+    let input = document.getElementById('input');
 
     //   function roomChosen(roomId) {
     //     socket.emit('room-chosen', roomId);
     //     console.log(roomId);
     //   }
 
-      function liveRooms(message, room_id) {
-        const messageElement = document.createElement('button');
-        messageElement.className =
-          'btn border border-dark rounded bg-white mr-3';
-        messageElement.id = room_id;
-        messageElement.textContent = message;
-        messageElement.onclick = function(id) {
-            id = room_id
-            console.log(id)
-            socket.emit('room-chosen', room_id)
-        }
-        activerooms.appendChild(messageElement);
+    function liveRooms(message, room_id) {
+      const messageElement = document.createElement('button');
+      messageElement.className =
+        'btn border border-dark rounded bg-white mr-3';
+      messageElement.id = room_id;
+      messageElement.textContent = message;
+      messageElement.onclick = function (id) {
+        id = room_id
+        console.log(id)
+        socket.emit('room-chosen', room_id)
       }
+      activerooms.appendChild(messageElement);
+    }
 
-      socket.on('rooms', (rooms) => {
-        rooms.forEach((element) => {
-          liveRooms(`Click to join: ${element}`, element);
-        });
-        // rooms.forEach((element) => {
-        //   socket.emit(':' + element, element)
-        // })
-        //console.log(rooms);
+    function updateScroll() {
+      var element = document.getElementById('messages');
+      element.scrollTop = element.scrollHeight;
+    }
+
+    function appendMessage(message) {
+      const messageElement = document.createElement('div');
+      messageElement.textContent = message;
+      messages.appendChild(messageElement);
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (input.value) {
+        const message = input.value;
+        // let messageYou = document.createElement('p');
+        // messageYou.textContent = `You: ${message}`
+        // messages.appendChild(messageYou)
+        appendMessage(`You: ${message}`);
+        updateScroll();
+        socket.emit('chat message', message);
+        input.value = '';
+        // console.log(socket.id);
+      }
+    });
+
+
+    socket.on('chat message', (data) => {
+      // let item = document.createElement('li');
+      // item.textContent = `${data.name}: ${data.msg}`
+      // messages.appendChild(item);
+      console.log('test')
+      appendMessage(`${data.name}: ${data.msg}`);
+      updateScroll();
+      //window.scrollTo(0, document.getElementById('messages').setint);
+    });
+
+    socket.on('rooms', (rooms) => {
+      rooms.forEach((element) => {
+        liveRooms(`Click to join: ${element}`, element);
       });
-    </script>
 
-    <!-- <script>
+
+      // rooms.forEach((element) => {
+      //   socket.emit(':' + element, element)
+      // })
+      //console.log(rooms);
+    });
+  </script>
+
+  <!-- <script>
       document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('myForm').style.display = 'none';
       });
@@ -185,5 +202,6 @@
         messages.appendChild(messageElement);
       }
     </script> -->
-  </body>
+</body>
+
 </html>

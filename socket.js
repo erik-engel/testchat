@@ -10,6 +10,7 @@ const io = require('socket.io')(server, {
 const users = {};
 const rooms = [];
 
+
 // Sockets
 
 io.on('connection', (socket) => {
@@ -22,36 +23,61 @@ io.on('connection', (socket) => {
   });
 });
 
+let num = 0
 io.on('connection', (socket) => {
-
+  let roomName;
   // Ny bruger i chat
   socket.on('new-user', (name) => {
-    socket.join('room-' + name);
     users[socket.id] = name;
-    if (rooms.includes('room-' + name) === false) rooms.push('room-' + name);
-    io.sockets.in('room-' + name).emit('user-connected', name);
+    if (rooms.includes('room-' + name) === false) {
+      roomName = 'room-' + name
+      rooms.push(roomName);
+      socket.join(roomName);
+      console.log("you have joined room " + roomName)
+    } else if (rooms.includes('room-' + name) === true) {
+      roomName = 'room-' + name + '-' + num
+      rooms.push(roomName)
+      socket.join(roomName)
+      console.log("you have joined room" + roomName)
+      num++
+    }
+    io.sockets.in(roomName).emit('user-connected', name);
     //socket.broadcast.emit('user-connected', name)
   });
 
-  // chat besked 
-  socket.on('chat message', (msg) => {
-    console.log('message: ', msg);
-    //socket.broadcast.emit('chat message', { msg: msg, name: users[socket.id] });
-    io.sockets
-      .in('room-' + users[socket.id])
-      .emit('chat message', { msg: msg, name: users[socket.id] });
-    console.log(rooms);
-  });
-  
+
+
 
   // admin, bot, ai
   socket.emit('rooms', rooms)
 
   socket.on('room-chosen', (roomId) => {
-    socket.join(roomId);
     console.log(roomId)
+    roomName = roomId
+    socket.join(roomName);
+    console.log(roomName)
   })
 
+  // chat besked 
+  socket.on('chat message', (msg) => {
+    console.log('message: ', msg, ' room: ', roomName, ' active rooms: ', rooms);
+    //socket.broadcast.emit('chat message', { msg: msg, name: users[socket.id] });
+    io.sockets
+      .in(roomName)
+      .emit('chat message', { msg: msg, name: 'admin' });
+  });
+
+  socket.on('disconnect', () => {
+    console.log(roomName)
+    socket.leave(roomName)
+    const index = rooms.indexOf(roomName)
+    if (index > -1 && users[socket.id] != undefined) {
+      console.log(index)
+      rooms.splice(index, 1)
+    }
+    console.log(rooms)
+
+  });
 
 });
 
