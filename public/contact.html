@@ -57,9 +57,30 @@
   </div>
   <script src="http://localhost:3000/socket.io/socket.io.js"></script>
   <script>
+    const socket = io('http://localhost:3000');
+    
+    let messages = document.getElementById('messages');
+    let form = document.getElementById('form');
+    let input = document.getElementById('input');
+    
+
+    // chat conversation 
+    // chat conversation
+    // let name =  
+    // let chatarray = sessionStorage.getItem('chat-conversation');
+    //   chatarray = JSON.parse(chatarray);
+    //   console.log(chatarray);
+
+    //   if (chatarray) {
+    //     chatarray.forEach((el) => {
+    //       console.log(el);
+    //       appendMessage(el);
+    //     });
+    //   }
     document.addEventListener('DOMContentLoaded', function () {
       document.getElementById('myForm').style.display = 'none';
     });
+    
     function openForm(name) {
       let chathead = document.getElementById('chat-header')
       document.getElementById('myForm').style.display = 'block';
@@ -68,7 +89,8 @@
       const name = prompt('What is your name?')
       socket.emit('new-user', name)
       appendMessage(`Hi ${name}, you have connected!`)
-      chathead.innerText = name
+      chathead.innerText = `Hi ${name}!` 
+      sessionStorage.setItem('name-chat', JSON.stringify(name) )
       } else {
         appendMessage(`Still connected!`)
       }
@@ -84,18 +106,11 @@
       element.scrollTop = element.scrollHeight;
     }
 
-    const socket = io('http://localhost:3000');
-    let messages = document.getElementById('messages');
-    let form = document.getElementById('form');
-    let input = document.getElementById('input');
 
     form.addEventListener('submit', e => {
       e.preventDefault();
       if (input.value) {
         const message = input.value
-        // let messageYou = document.createElement('p');
-        // messageYou.textContent = `You: ${message}`
-        // messages.appendChild(messageYou)
         appendMessage(`You: ${message}`)
         updateScroll();
         socket.emit('chat message', message);
@@ -104,14 +119,11 @@
       }
     });
 
-    socket.on('user-connected', name => {
-      // let connected = document.createElement('p');
-      // connected.textContent = `${name} is connected`
-      // messages.appendChild(connected) 
+    socket.on('user-connected', name => { 
       appendMessage(`${name} is connected`)
     });
 
-    socket.on('chat message', data => {
+    socket.on('chat-message', data => {
       // let item = document.createElement('li');
       // item.textContent = `${data.name}: ${data.msg}`
       // messages.appendChild(item);

@@ -10,7 +10,6 @@ const io = require('socket.io')(server, {
 const users = {};
 const rooms = [];
 
-
 // Sockets
 
 io.on('connection', (socket) => {
@@ -23,64 +22,86 @@ io.on('connection', (socket) => {
   });
 });
 
-let num = 0
+let num = 0;
 io.on('connection', (socket) => {
   let roomName;
   // Ny bruger i chat
   socket.on('new-user', (name) => {
     users[socket.id] = name;
-    if (rooms.includes('room-' + name) === false) {
-      roomName = 'room-' + name
+    // if (rooms.includes('room-' + name) === false) {
+    if (rooms.includes(name) === false) {
+      roomName = name;
       rooms.push(roomName);
       socket.join(roomName);
-      console.log("you have joined room " + roomName)
-    } else if (rooms.includes('room-' + name) === true) {
-      roomName = 'room-' + name + '-' + num
-      rooms.push(roomName)
-      socket.join(roomName)
-      console.log("you have joined room" + roomName)
-      num++
+      console.log('you have joined room ' + roomName);
+    } else if (rooms.includes(name) === true) {
+      roomName = name + '-' + num;
+      rooms.push(roomName);
+      socket.join(roomName);
+      console.log('you have joined room' + roomName);
+      num++;
     }
-    io.sockets.in(roomName).emit('user-connected', name);
+    //io.in(roomName).emit('user-connected', name);
+    io.emit('room', roomName);
+    socket.broadcast.to(roomName).emit('user-connected', name);
     //socket.broadcast.emit('user-connected', name)
   });
 
-
-
-
   // admin, bot, ai
-  socket.emit('rooms', rooms)
+  socket.emit('rooms', rooms);
 
-  socket.on('room-chosen', (roomId) => {
-    console.log(roomId)
-    roomName = roomId
+  socket.on('room-chosen', (oldId, roomId) => {
+    console.log(oldId);
+    socket.leave(oldId);
+    console.log(roomId);
+    roomName = roomId;
     socket.join(roomName);
-    console.log(roomName)
-  })
+    //console.log(roomName)
+  });
 
-  // chat besked 
+  // chat besked client -> admin
   socket.on('chat message', (msg) => {
-    console.log('message: ', msg, ' room: ', roomName, ' active rooms: ', rooms);
+    console.log(
+      'message: ',
+      msg,
+      ' room: ',
+      roomName,
+      ' active rooms: ',
+      rooms
+    );
+    socket.broadcast.emit('chat message', { msg: msg, name: users[socket.id] });
+    // io.sockets
+    //   .in(roomName)
+    //   .emit('chat-message', { msg: msg, name: 'admin' });
+  });
+
+  // chat besked admin -> client
+  socket.on('chat-message', (msg) => {
+    console.log(
+      'message: ',
+      msg,
+      ' room: ',
+      roomName,
+      ' active rooms: ',
+      rooms
+    );
     //socket.broadcast.emit('chat message', { msg: msg, name: users[socket.id] });
-    io.sockets
-      .in(roomName)
-      .emit('chat message', { msg: msg, name: 'admin' });
+    io.sockets.in(roomName).emit('chat-message', { msg: msg, name: 'admin' });
   });
 
   socket.on('disconnect', () => {
-    console.log(roomName)
-    socket.leave(roomName)
-    const index = rooms.indexOf(roomName)
+    console.log(roomName);
+    socket.leave(roomName);
+    const index = rooms.indexOf(roomName);
     if (index > -1 && users[socket.id] != undefined) {
-      console.log(index)
-      rooms.splice(index, 1)
+      console.log(index);
+      rooms.splice(index, 1);
     }
-    console.log(rooms)
+    console.log(rooms);
 
+    io.emit('room disconnect', roomName);
   });
-
 });
-
 
 const PORT = process.env.PORT || 3000;
 
